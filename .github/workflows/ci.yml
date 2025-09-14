@@ -1,30 +1,36 @@
 name: CI  # Workflow name shown in GitHub Actions tab
 
 on:
-  push:            # Run on any push to the repo
+  push:
     branches: [ main ]
-  pull_request:    # Also run on any PR, before merge
+  pull_request:
 
 permissions:
-  contents: read   # Minimal permissions to read repo contents
+  contents: read
 
 jobs:
-  build-and-test:          # Job name (logical)
-    runs-on: ubuntu-latest # Use GitHub-hosted Ubuntu runner
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Make sure the repo root is on PYTHONPATH so "from app.main import app" works
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Pulls your repo files into the runner
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"   # Use Python 3.11 (adjust if you prefer)
+          python-version: "3.11"         # keep CI on a stable version
+          cache: "pip"                   # speed up installs
+          cache-dependency-path: "requirements.txt"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip     # Keep pip fresh
-          pip install -r requirements.txt         # Install project deps
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest -q   # Run pytest (quiet). Fails the job if tests fail.
+        run: pytest -q
