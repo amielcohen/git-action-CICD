@@ -1,0 +1,30 @@
+name: CI  # Workflow name shown in GitHub Actions tab
+
+on:
+  push:            # Run on any push to the repo
+    branches: [ main ]
+  pull_request:    # Also run on any PR, before merge
+
+permissions:
+  contents: read   # Minimal permissions to read repo contents
+
+jobs:
+  build-and-test:          # Job name (logical)
+    runs-on: ubuntu-latest # Use GitHub-hosted Ubuntu runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Pulls your repo files into the runner
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"   # Use Python 3.11 (adjust if you prefer)
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip     # Keep pip fresh
+          pip install -r requirements.txt         # Install project deps
+
+      - name: Run tests
+        run: pytest -q   # Run pytest (quiet). Fails the job if tests fail.
